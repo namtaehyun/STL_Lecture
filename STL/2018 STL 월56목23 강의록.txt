@@ -1,0 +1,413 @@
+
+
+-------------------------
+강의기록시간 - Mon Mar  5 15:06:20 2018
+-------------------------
+/* 문제 1
+#include <iostream>
+using namespace std;
+
+class Animal 
+{
+public:
+	virtual void move() = 0; // 메모리를 희생해서 다형성을 구현하는 키워드 => virtual
+							 // 순수 가상함수 -> 나를 상속 받으려면 너는 이 함수를 무조건 다시 정의해야 한다. (오버라이드 override)
+							 // == 인터페이스를 강제한다.
+};
+class Dog : public Animal
+{
+public:
+	virtual void move() 
+	{
+		cout << "멍멍이가 달린다."<<endl;
+	}
+};
+class Bird : public Animal
+{
+public:
+	virtual void move()
+	{
+		cout << "새가 난다." << endl;
+	}
+};
+
+
+
+int main()
+{
+	Animal * p[3]; // 조상의 포인터를 이용해서 객체를 가리키도록해야한다. 업 캐스팅
+	p[0] = new Bird; // 실행 시간동안에 바뀔 수 있다. 동적인 프로그래밍
+	p[1] = new Dog;
+	p[2] = new Bird;
+	for (int i = 0; i < 3; i++) // 3이 아닌 다른숫자로 동적으로 바뀔 수 있다.
+	{
+		p[i]->move(); // 개인지 새인지 몰라도 동일한 명령을 내릴 수 있다.
+					  // 그래도 개와 새는 동일한 명령에 동물에 따라서 다르게 행동한다.
+	}
+}
+*/
+//문제2. struct와 class는 다른점이 없다.
+
+/*
+문제3
+#include <iostream>
+using namespace std;
+
+int main()
+{
+	int *p=new int{100}; // 초기에 클래스의 경우 여러가지 값을 넣을 수 있기 때문에 {}를 사용하여 초기화한다.
+	*p = 200;
+	delete(p);
+}
+*/
+
+
+/*
+문제 4,5
+#include <iostream>
+using namespace std;
+
+void Change(int& x, int &y)
+{
+	int temp = x;
+	x = y;
+	y = temp;
+}
+
+int main()
+{
+	int x{ 5 }, y{ 10 };
+	Change(x, y); // x,y의 값이 복사되어 들어가고, 함수에서 나올때 원본은 아무런 변화가 없다. 인자가 callbyvalue로 전달된다.
+	cout << x << " " << y << endl;
+}
+*/
+
+/*
+#include <iostream>
+using namespace std;
+
+template<class T> // 자료형이 무한개이다. 그렇기 때문에 템플릿이라는 녀석을 사용한다.
+void Change(T& x, T &y)
+{
+	T temp = x;
+	x = y;
+	y = temp;
+}
+
+int main()
+{
+	int x{ 5 }, y{ 10 };
+	Change(x, y); // x,y의 값이 복사되어 들어가고, 함수에서 나올때 원본은 아무런 변화가 없다. 인자가 callbyvalue로 전달된다.
+	cout << x << " " << y << endl;
+}
+
+*/
+
+#include <iostream>
+#include <fstream>
+#include <chrono> // 시간을 다루는 라이브러리
+using namespace std;
+void save(void);
+
+int main()
+{
+	save();
+}
+void save(void)
+{
+	// 소스파일을 하드디스크에 덧붙여 기록
+	ifstream in("소스.cpp");
+	ofstream out("2018 STL 월56목23 강의록.txt", ios::app);//덧붙이기모드 ios::app
+
+
+	//시간 1970.1.1을 기준으로 클락을 뗀 갯수만큼 저장한다. 32비트 정수로
+	auto tp = chrono::system_clock::now(); //현재 타임포인트
+	auto t = chrono::system_clock::to_time_t(tp);
+
+	out << endl << endl;
+	out << "-------------------------" << endl;
+	out << "강의기록시간 - "<<ctime(&t);
+	out << "-------------------------" << endl;
+
+	char c;
+
+	while (in.get(c))
+	{
+		out.put(c);
+	}
+}
+
+-------------------------
+강의기록시간 - Mon Mar  5 15:14:21 2018
+-------------------------
+#include "Save.h"
+//--------------------------------------------------------------------
+//2018. 1학기 STL 월56 목23				3/5						(1주 1)
+//
+//첫시간
+//과목소개 - 강의계획서
+// 시험 - C++ 기본 ,클래스, 템플릿
+// Save() 함수 완성 - 파일분리
+//--------------------------------------------------------------------
+int main()
+{
+	Save(); // 강의 내용을 기록한다.
+}
+
+
+-------------------------
+강의기록시간 - Thu Mar  8 11:47:05 2018
+-------------------------
+#include "Save.h"
+#include <string>
+#include <iostream>
+using namespace std;
+//--------------------------------------------------------------------
+//2018. 1학기 STL 월56 목23				3/8						(1주 2)
+//
+// 템플릿/클래스 복습 
+//--------------------------------------------------------------------
+
+class Dog
+{
+private:
+	string name; 
+	int age;	
+
+public:
+	Dog(const char * s, int age) : age{ age }, name{ s }
+	{
+	}
+	int GetAge() const
+	{
+		return this->age;
+	}
+	string GetName() const // 바꾸지 않을거기 떄문에 const를 마지막에 꼭 붙여주어야 함.
+	{
+		return this->name;
+	}
+	friend ostream& operator<<(ostream& os,const Dog& dt);
+};
+
+
+template <class T> // 템플릿을 사용하는 이유 : 같은함수인데 자료형만 바꿔야 한다. 그러면 쓰잘데기없이 많은 자료형에 대해 같은함수를 여러개 만들어줘야한다.
+				   // 이런 복잡한 짓을 하지 않기 위해서 컴파일러가 템플릿을 사용해서 알아서 바꿔준다.
+void exchange(T & , T &); // 함수템플릿 선언
+//const Dog&-> const의 의미 : 전달된 인자를 읽기만 하겠다. -> exchange함수에서 const를 사용하는것은 값을 변경할 것이기 때문에 옳지 않다.
+
+int main()
+{
+	// 이 프로그램이 21이라고 출력되도록 exchange를 선언하고
+	// 정의하라.
+	{
+		int a{ 1 }, b{ 2 };
+		exchange(a, b);
+		// 정식은 exchange<int>(a,b)이다. 하지만 클래스가 될 경우 생략할 수 없다.
+		cout << a << b << endl;
+	}
+	{
+		string a{ "world!" }, b{ "Hello, " };
+		exchange(a, b);
+		cout << a << b << endl;
+	}
+	{
+		Dog a{ "바둑이",10 }, b{"댕댕이",7};
+		exchange<Dog>(a, b);
+		cout << a << endl; // 댕댕이 7살입니다.
+		cout << b << endl; // 바둑이 10살입니다.
+	}
+	Save(); // 강의 내용을 기록한다.
+}
+
+template <class T>
+void exchange(T & a, T &b) // 정의
+{
+	T temp { a };
+	a = b;
+	b = temp;
+}
+
+ostream& operator<<(ostream& os,const Dog& d) // 오버로딩
+{
+	os << d.GetName() << " "<< d.GetAge() << "살 입니다.";
+	return os;
+}
+
+
+// 선언과 정의의 차이점 : 선언은 함수가 있다는 것을 컴파일러에게 알려주는 것. 정의는 함수의 몸체를 코딩하는 것.
+// 선언은 아무데서나 할 수 있다. 함수호출을 하기 전이라면 무조건 상관없음. 여러번 선언해도 상관없다.
+// 정의는 여러번 할 수 없다. 
+
+
+-------------------------
+강의기록시간 - Mon Mar 12 14:35:21 2018
+-------------------------
+#include "Save.h"
+#include <string>
+#include <iostream>
+using namespace std;
+//--------------------------------------------------------------------
+//2018. 1학기 STL 월56 목23				3/12					(2주 1)
+//
+// 템플릿/클래스 복습 
+//
+// 자료 정렬
+//		qsort
+//		void* - 이 자료를 니 마음대로 형변환해서 써도 됨.
+// 랜덤 자료 생성
+// 클래스 이동
+// 알고리즘 시간재기
+//--------------------------------------------------------------------
+int f(const void*, const void*); // void의 핵심 -> 자료형은 모르겠는데 그 자료형은 여기 있어. 그리고 f너는 값을 비교만하면 되니까 값을 바꾸지는 마 const를 붙임.
+int f(const void* a, const void* b)
+{
+	return *(int*)a - *(int*)b;
+}
+
+
+int main()
+{
+	// 정수를 오름차순으로 정렬하자 
+	int a[10] {1,3,5,7,9,2,4,6,8,10}; // a[10] = {}; => 옛날 방식
+	// a를 C함수인 qsort를 이용하여 정렬하자.
+	// qsort는 generic 함수라고 나는 생각한다.
+	// generic함수는? -> 전달되는 인자의 자료형에 상관없이 정렬하는 함수.
+
+	//qsort(a, 10, sizeof(int),Compare);
+	qsort(a, 10, sizeof(int),f); //qsort는 -1,1,0의 값이 리턴되어야 한다.
+
+	for (int i=0;i<10;i++)
+	{
+		cout << a[i] << " ";
+	}
+	Save();
+}
+
+/*
+int main() // 함수의 이름자체가 주소값이다.
+{
+(*main)()
+}
+*/
+
+-------------------------
+강의기록시간 - Mon Mar 12 14:38:17 2018
+-------------------------
+#include "Save.h"
+#include <string>
+#include <iostream>
+using namespace std;
+//--------------------------------------------------------------------
+//2018. 1학기 STL 월56 목23				3/12					(2주 1)
+//
+// 템플릿/클래스 복습 
+//
+// 자료 정렬
+//		qsort
+//		void* - 이 자료를 니 마음대로 형변환해서 써도 됨.
+// 랜덤 자료 생성
+// 클래스 이동
+// 알고리즘 시간재기
+//--------------------------------------------------------------------
+
+
+int main()
+{
+	// 정수를 오름차순으로 정렬하자 
+	int a[10] {1,3,5,7,9,2,4,6,8,10}; // a[10] = {}; => 옛날 방식
+	// a를 C함수인 qsort를 이용하여 정렬하자.
+	// qsort는 generic 함수라고 나는 생각한다.
+	// generic함수는? -> 전달되는 인자의 자료형에 상관없이 정렬하는 함수.
+
+	qsort(a, 10, sizeof(int), [](const void* a, const void* b) // 람다 선언 [] 람다 = 무명함수
+	{
+		return *(int*)a - *(int*)b;
+	}
+	); //qsort는 -1,1,0의 값이 리턴되어야 한다.
+
+	for (int i:a)
+	{
+		cout << i << " ";
+	}
+	Save();
+}
+
+/*
+int main() // 함수의 이름자체가 주소값이다.
+{
+(*main)()
+}
+*/
+
+
+
+-------------------------
+강의기록시간 - Mon Mar 12 15:18:48 2018
+-------------------------
+#include "Save.h"
+#include <string>
+#include <iostream>
+using namespace std;
+//--------------------------------------------------------------------
+//2018. 1학기 STL 월56 목23				3/12					(2주 1)
+//
+// 템플릿/클래스 복습 
+//
+// 자료 정렬
+//		qsort
+//		void* - 이 자료를 니 마음대로 형변환해서 써도 됨.
+// 랜덤 자료 생성
+// 클래스 이동
+// 알고리즘 시간재기
+//--------------------------------------------------------------------
+
+class Dog
+{
+	string name;
+	int age;
+public:
+	Dog(const char * s, int n) :name(s), age(n)
+	{
+	}
+	int GetAge() const
+	{
+		return age;
+	}
+	string GetName() const
+	{
+		return name;
+	}
+	friend	inline ostream& operator<<(ostream& os, const Dog& d) 
+	{
+		os << d.name << " " << d.age << "살 입니다.";
+		return os;
+	}
+};
+
+int main()
+{
+	//Dog를 나이 오름차순으로 정렬하자.
+	Dog a[5] = { {"개똥이",15},{ "개봉이",21 },{ "개준이",4 },{ "개순이",2 },{ "개동이",3 } };
+	qsort(a, 5, sizeof(Dog), [](const void* a, const void* b) // 람다 선언 [] 람다 = 무명함수
+	{
+		//return ((Dog*)a)->GetAge()-((Dog*)b)->GetAge(); C스타일 캐스팅
+		//static_cast const_cast reinterpret_cast dynamic_cast
+		return static_cast<const Dog*>(a)->GetAge() - static_cast<const Dog*>(b)->GetAge();
+		//const_cast를 쓰면 const를 전부 날리고 캐스팅한다.
+		//static_cast는 const를 날리지 않는다.
+	}
+	); //qsort는 -1,1,0의 값이 리턴되어야 한다.
+	
+	for (const Dog& i:a)  
+	{
+		cout << i<<endl;
+	}
+	Save();
+}
+
+/*
+int main() // 함수의 이름자체가 주소값이다.
+{
+(*main)()
+}
+*/
