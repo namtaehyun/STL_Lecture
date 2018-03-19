@@ -411,3 +411,378 @@ int main() // 함수의 이름자체가 주소값이다.
 (*main)()
 }
 */
+#include "Save.h"
+#include <time.h>
+#include <string>
+#include <random>
+#include <iostream>
+#include <vector>
+#define SIZE 10000
+using namespace std;
+//--------------------------------------------------------------------
+//2018. 1학기 STL 월56 목23				3/15					(2주 2)
+//
+// 템플릿/클래스 복습 
+//
+// 개를 1000마리 만들어서 정렬해보자.
+// random generation 함수
+//	
+// 자습 시간
+// 
+// 
+//--------------------------------------------------------------------
+char a[10];
+
+int GetRandomNumber(int min, int max); // http://gabble-workers.tistory.com/7
+class Dog
+{
+	string name;
+	int age;
+public:
+	Dog(){
+		MakeRandomAge();
+		MakeRandomName();
+	}
+	Dog(const char * s, int n) :name(s), age(n)
+	{
+	}
+	int GetAge() const
+	{
+		return age;
+	}
+	string GetName() const
+	{
+		return name;
+	}
+	void MakeRandomAge()
+	{
+		age = GetRandomNumber(1, 20);
+	}
+	void MakeRandomName()
+	{
+		for (int i = 0; i < 10; i++) {
+			a[i] = GetRandomNumber(65, 90);
+		}
+		name = a;
+	}
+
+	friend	inline ostream& operator<<(ostream& os, const Dog& d) 
+	{
+		os << d.name << " " << d.age << "살 입니다.";
+		return os;
+	}
+};
+int main()
+{
+	srand(time(NULL));
+	//Dog를 나이 오름차순으로 정렬하자.
+
+	Dog dogs[SIZE];
+
+	qsort(dogs, SIZE, sizeof(Dog), [](const void* a, const void* b) // 람다 선언 [] 람다 = 무명함수
+	{
+		//return ((Dog*)a)->GetAge()-((Dog*)b)->GetAge(); C스타일 캐스팅
+		//static_cast const_cast reinterpret_cast dynamic_cast
+		return static_cast<const Dog*>(a)->GetAge() - static_cast<const Dog*>(b)->GetAge();
+		//const_cast를 쓰면 const를 전부 날리고 캐스팅한다.
+		//static_cast는 const를 날리지 않는다.
+	}
+	); //qsort는 -1,1,0의 값이 리턴되어야 한다.
+	
+	for (const Dog& i:dogs)  
+	{
+		cout << i<<endl;
+	}
+	Save();
+}
+
+
+int GetRandomNumber(int min, int max)
+{
+	//< 1단계. 시드 설정
+	random_device rn;
+	mt19937_64 rnd(rn());
+
+	//< 2단계. 분포 설정 ( 정수 )
+	uniform_int_distribution<int> range(min, max);
+
+	//< 3단계. 값 추출
+	return range(rnd);
+}
+
+
+-------------------------
+강의기록시간 - Mon Mar 19 13:55:10 2018
+-------------------------
+#include "Save.h"
+#include <iostream>
+#include <random>
+using namespace std;
+//--------------------------------------------------------------------
+//2018. 1학기 STL 월56 목23				3/19					(3주 1)
+//
+// 템플릿/클래스 복습 
+//
+// 자료를 가지고 뭘 할건가? (클래스)
+//	- 원하는 결과를 얻기위해 조작한다 == 알고리즘
+// 
+// 	
+// 랜덤 자료 생성
+// 클래스 이동
+// 알고리즘 시간재기
+//--------------------------------------------------------------------
+
+
+// 처리해야 할 자료가 많이 있다고 가정
+// 내가 처리해야 할 자료를 생성하는 법(?) - 랜덤 생성
+// 처리할 자료는 어디에 존재하는가?
+
+// 정수 1000개를 정렬하고 싶다.
+// 랜덤 숫자를 생성하려면 -- C++
+// 랜덤엔진과 확률분포를 사용하여 생성한다. 책을 볼것. 139쪽
+// 1.랜덤엔진을 선택한다.
+// 2.확률분포를 선택한다.
+// 3.확률분포(랜덤엔진) - 함수호출하면 랜덤값이 나온다.
+
+int main()
+{
+	int n[1000];
+	default_random_engine dre; // 32비트숫자이다. 21억개정도까지 값이 있다.
+	uniform_int_distribution<> uid; // 평균적인 분포 <>값이 디폴트일때 int이다.
+	for (int &d : n) {
+		d = uid(dre);
+	}
+	//평균값에 많은데이터들이 몰려있을 경우 노멀분포(가우시안분포)를 사용한다.
+	//지수분포, 로그분포, 평균분포
+	/*
+	for (int &d : n) //원본을 복사하지말고 원본자체를 쓴다. &사용
+	{
+		d = rand();
+	} // 확률에 연관이 없어야 한다. 랜덤성이 떨어진다. (예측할 수 있다.) 결과가 16비트로 정해져있다. (32767까지?)
+	*/
+	qsort(n, 1000, sizeof(int), [](const void * a, const void * b)
+	{
+		return *(int*)a - *(int*)b;
+	});
+	for (int n : n) {
+		cout << n << endl;
+	}
+	Save();
+}
+
+-------------------------
+강의기록시간 - Mon Mar 19 14:19:40 2018
+-------------------------
+#include "Save.h"
+#include <iostream>
+#include <random>
+using namespace std;
+//--------------------------------------------------------------------
+//2018. 1학기 STL 월56 목23				3/19					(3주 1)
+//
+// 템플릿/클래스 복습 
+//
+// 자료를 가지고 뭘 할건가? (클래스)
+//	- 원하는 결과를 얻기위해 조작한다 == 알고리즘
+// 
+// 	
+// 랜덤 자료 생성
+// 클래스 이동
+// 알고리즘 시간재기
+//--------------------------------------------------------------------
+
+
+// 처리해야 할 자료가 많이 있다고 가정
+// 내가 처리해야 할 자료를 생성하는 법(?) - 랜덤 생성
+// 처리할 자료는 어디에 존재하는가?
+
+// 정수 1000개를 정렬하고 싶다.
+// 랜덤 숫자를 생성하려면 -- C++
+// 랜덤엔진과 확률분포를 사용하여 생성한다. 책을 볼것. 139쪽
+// 1.랜덤엔진을 선택한다.
+// 2.확률분포를 선택한다.
+// 3.확률분포(랜덤엔진) - 함수호출하면 랜덤값이 나온다.
+
+// 정수 1000만개 정렬해보자.
+//int n[10000000]; // 전역변수 여기에 초기값을 주면 실행파일의 용량이 커진다. int n[10000000]{333};
+// 이유?? 하드디스크의 자원을 쓴다.(실제 메모리를 많이 차지한다.)
+// 그러므로 전역변수를 쓰는게 아니라 동적할당을 해서 사용하는 것이 좋다.
+int main()
+{
+	//int n[10000000]; // 지역변수는 스택영역에 쌓인다. 스택은 큰데이터를 쌓는 것이 아니라, 함수에 인자를 넣거나, 태스크를 바꾸거나.. 등등 에 사용한다.
+	int k = 10000000;
+	int * n = new int[k];
+	
+	default_random_engine dre;   			   // 32비트숫자이다. 21억개정도까지 값이 있다.
+							   //평균값에 많은데이터들이 몰려있을 경우 노멀분포(가우시안분포)를 사용한다.
+							   //지수분포, 로그분포, 평균분포
+	uniform_int_distribution<> uid; // 평균적인 분포 <>값이 디폴트일때 int이다. 범위를 제한 할 수 있다.uid(0,100)
+
+	for (int i = 0;i<k;i++) // 포인터는 범위지정for루프를 사용할 수 없다.
+	{
+		n[i] = uid(dre);
+	}
+
+	qsort(n, k, sizeof(int), [](const void * a, const void * b)
+	{
+		return *(int*)a - *(int*)b;
+	});
+
+	for (int i = 0; i<10; i++) // 앞에서 정렬된거 10개만 출력
+	{
+		cout << n[i] << endl;
+	}
+	delete(n);
+	Save();
+}
+
+-------------------------
+강의기록시간 - Mon Mar 19 14:40:31 2018
+-------------------------
+#include "Save.h"
+#include <iostream>
+#include <random>
+#include <ctime>
+#include <chrono> // 시간재기
+
+using namespace std;
+//--------------------------------------------------------------------
+//2018. 1학기 STL 월56 목23				3/19					(3주 1)
+//
+// 템플릿/클래스 복습 
+//
+// 자료를 가지고 뭘 할건가? (클래스)
+//	- 원하는 결과를 얻기위해 조작한다 == 알고리즘
+// 
+// 	
+// 랜덤 자료 생성,랜덤 엔진 시드
+// 자료의 위치(전역,지역,동적)
+// 알고리즘 실행시간 측정 (chrono 사용)
+//--------------------------------------------------------------------
+
+
+// seed와 시간측정
+int main()
+{
+	int k = 10000000;
+	int * n = new int[k];
+	
+	default_random_engine dre;   			   // 32비트숫자이다. 21억개정도까지 값이 있다.
+	dre.seed(time(NULL)); // 시드 설정
+	uniform_int_distribution<> uid; // 평균적인 분포 <>값이 디폴트일때 int이다. 범위를 제한 할 수 있다.uid(0,100)
+
+	for (int i = 0;i<k;i++) // 포인터는 범위지정for루프를 사용할 수 없다.
+	{
+		n[i] = uid(dre);
+	}
+	//시간재기시작
+	auto begin = chrono::high_resolution_clock::now(); // 가장 정밀한 시간을 측정가능.
+	qsort(n, k, sizeof(int), [](const void * a, const void * b)
+	{
+		return *(int*)a - *(int*)b;
+	});
+	auto elapsedTime = chrono::high_resolution_clock::now()-begin;
+	//시간재기끝
+	for (int i = 0; i<10; i++) // 앞에서 정렬된거 10개만 출력
+	{
+		cout << n[i] << endl;
+	}
+	cout << chrono::duration<double>(elapsedTime).count() <<"s"<< endl;
+	delete []n;
+	Save();
+}
+
+-------------------------
+강의기록시간 - Mon Mar 19 14:44:32 2018
+-------------------------
+#include "Save.h"
+#include <iostream>
+#include <thread> // 병렬처리
+#include <chrono> // 시간재기
+
+using namespace std;
+//--------------------------------------------------------------------
+//2018. 1학기 STL 월56 목23				3/19					(3주 1)
+//
+// 템플릿/클래스 복습 
+//
+// 자료를 가지고 뭘 할건가? (클래스)
+//	- 원하는 결과를 얻기위해 조작한다 == 알고리즘
+// 
+// 	
+// 랜덤 자료 생성,랜덤 엔진 시드
+// 자료의 위치(전역,지역,동적)
+// 알고리즘 실행시간 측정 (chrono 사용)
+//--------------------------------------------------------------------
+
+
+// seed와 시간측정
+int main()
+{
+	//시간재기시작
+	auto begin = chrono::high_resolution_clock::now(); // 가장 정밀한 시간을 측정가능.
+	//시간을 재고싶은 코드를 넣으면 됨.
+	this_thread::sleep_for(100ms); // 3초를 쉰다. 3s ,3 밀리초를 쉰다 3ms , 3시간을 쉰다. 3h
+	auto elapsedTime = chrono::high_resolution_clock::now()-begin;
+	//시간재기끝
+	cout << chrono::duration<double>(elapsedTime).count() <<"s"<< endl;
+	Save();
+}
+
+-------------------------
+강의기록시간 - Mon Mar 19 15:13:43 2018
+-------------------------
+#include "Save.h"
+#include <iostream>
+#include <random>
+#include <ctime>
+#include <fstream>
+using namespace std;
+//--------------------------------------------------------------------
+//2018. 1학기 STL 월56 목23				3/19					(3주 1)
+//
+// 템플릿/클래스 복습 
+//
+// 자료를 가지고 뭘 할건가? (클래스)
+//	- 원하는 결과를 얻기위해 조작한다 == 알고리즘
+// 
+// 	
+// 랜덤 자료 생성,랜덤 엔진 시드
+// 자료의 위치(전역,지역,동적)
+// 알고리즘 실행시간 측정 (chrono 사용)
+//--------------------------------------------------------------------
+
+
+// 처리할 자료는 내 프로그램과는 상관 없이 존재할 것이다.
+// 내 프로그램이 할 일은 접근해서 읽어와야 한다.
+
+// 하드디스크에 자료 파일이 있다.
+// 읽어서 원하는 처리를 하자.
+
+
+// 자료를 제대로 읽고 쓸 줄 알아야겠다.
+// 메모리를 그대로 기록하는 write함수를 써야한다.
+// 메모리 크기는 1바이트도 어긋나선 안된다.
+// - 잘못되었다면 (binary 모드와 text모드의 차이점을 공부해야함.) http://blog.naver.com/PostView.nhn?blogId=zkd1750&logNo=90188576418
+int main()
+{
+	// 정수를 1000개 파일로 저장하라.
+	default_random_engine dre;
+	uniform_int_distribution<> uid;
+	int n[1000];
+	for (int i = 0; i < 1000; i++) 
+	{
+		n[i] = uid(dre);
+	}
+	ofstream out("정수1000개",ios::binary); 
+	out.write((const char*)n, 1000 * sizeof(int)); // 메모리 몇바이트를 통째로 써줘. cpu의 개입이 없음.
+	/*
+	for (int i = 0; i < 1000; i++)
+	{
+		out << n[i] << " ";
+	} // 4천바이트면 저장할 수 있어야 하는데, 10491바이트를 쓰고 있다.
+	  // 이런식으로하면 102013020 같은 숫자를 아스키코드로 변환해서 저장하므로 많은 용량을 차지한다.
+	out << endl;
+	*/
+	Save();
+}
